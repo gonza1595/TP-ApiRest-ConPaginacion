@@ -1,0 +1,39 @@
+El archivo Docker que proporcionaste parece ser un Dockerfile utilizado para crear una imagen de contenedor para una aplicación Java Spring Boot. Aquí está la explicación línea por línea de lo que hace cada instrucción en el Dockerfile:
+
+FROM alpine:latest as build:
+Esta línea establece la imagen base para la primera etapa de la construcción (build stage) del contenedor. Utiliza la imagen Alpine Linux más reciente como base.
+
+RUN apk update:
+ Esta línea ejecuta el comando apk update dentro del contenedor Alpine para actualizar los paquetes disponibles.
+
+RUN apk add openjdk17:
+ Instala el JDK de Java 17 dentro del contenedor Alpine utilizando el gestor de paquetes apk.
+
+COPY . .:
+ Copia todos los archivos y directorios desde el directorio actual de construcción (donde se encuentra el Dockerfile) al directorio raíz del contenedor actual.
+
+RUN chmod +x ./gradlew:
+Cambia los permisos del archivo gradlew para que sea ejecutable dentro del contenedor.
+
+RUN ./gradlew bootJar --no-daemon:
+Ejecuta el comando ./gradlew bootJar --no-daemon dentro del contenedor.
+ Este comando probablemente compila y empaqueta la aplicación Spring Boot en un archivo JAR ejecutable.
+
+FROM openjdk:17-alpine:
+Establece una nueva etapa en la construcción de la imagen, utilizando la imagen base de OpenJDK 17 en Alpine Linux.
+
+EXPOSE 9000:
+ Expone el puerto 9000 en el contenedor. Esto no abre el puerto en el host, pero es informativo para los usuarios que deseen ejecutar el contenedor y saber qué puertos deben mapear.
+
+COPY --from=build ./build/libs/restfake-0.0.1-SNAPSHOT.jar ./app.jar:
+Copia el archivo JAR generado en la etapa de construcción (build stage)
+desde la ubicación ./build/libs/restfake-0.0.1-SNAPSHOT.jar al directorio raíz del contenedor y lo renombra como app.jar.
+
+ENTRYPOINT ["java", "-jar", "app.jar"]:
+ Establece el punto de entrada del contenedor. Cuando el contenedor se inicie, ejecutará el comando java -jar app.jar, que iniciará la aplicación Java Spring Boot contenida en el archivo JAR app.jar.
+
+En resumen, este Dockerfile crea un contenedor que contiene una aplicación Spring Boot basada en Java 17 y la inicia cuando se inicia el contenedor, utilizando el archivo JAR generado durante la construcción.
+
+
+
+
